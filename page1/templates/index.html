@@ -1,0 +1,611 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Home </title>
+
+    <meta charset="utf-8">
+    <!--[if IE]><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'><![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="">
+
+    <!-- Google Fonts -->
+
+    <!-- Css -->
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/font-icons.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/sliders.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+
+    <!-- Favicons -->
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+    <link rel="shortcut icon" href="{% static 'img/apple-touch-icon.png' %}">
+    <link rel="shortcut icon" href="{% static 'img/apple-touch-icon-72x72.png' %}">
+    <link rel="shortcut icon" href="{% static 'img/apple-touch-icon-114x114.png' %}">
+
+    <script type="text/javascript" src="{% static 'js/jquery-3.3.1.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.cookie.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-ui.js' %}"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <!-- 加载温度的ajax-->
+    <script type="text/javascript">
+
+        var getting = {
+            url: "testajax", //后台查询验证的方法
+            dataTpye: "json",
+            data: {},
+            type: "get",
+            success: function (msg) {
+                var parsedJson = jQuery.parseJSON(msg);
+                console.log(parsedJson[0].fields.hmui);
+                $("#th").html('当前温度：' + parsedJson[0].fields.temp + '℃</br>' + '当前湿度：' + parsedJson[0].fields.hmui + '%');
+
+            },
+            error: function () {  //请求失败的回调方法
+                alert("请求失败，请重试");
+            }
+        };
+        window.setInterval(function () {
+            $.ajax(getting)
+        }, 3000);   //每三秒调用一次ajax
+
+        //动作展示部分的js
+        $(function(){
+            $('li').mouseover(function(e) {
+                $(this).siblings().stop().fadeTo(500,0.4);
+            });
+            $('li').mouseout(function(e) {
+                $(this).siblings().stop().fadeTo(500,1);
+            });
+        })
+
+    </script>
+    <!-- 校正图片的ajax-->
+    <script type="text/javascript">
+        function addDate(date,days){
+           var d=new Date(date);
+           d.setDate(d.getDate()+days);
+           var m=d.getMonth()+1;
+           return d.getFullYear()+'-'+m+'-'+d.getDate();
+         }
+        $(document).ready(function () {
+
+
+
+            function initData() {
+                //console.log(series[1].data);
+                let score = new Array();
+                $.ajax({
+                    type: 'GET',
+                    dataType: "json",
+                    url: "getall",
+
+                    success: function (res) {
+                        //alert("加载数据");
+                        console.log('in function');
+                        //console.log(res);
+
+                        for (let i = 0; i < 12; i++) {
+                            score.push(res[i].fields.temp);
+                        }
+                        series[1].data = score;
+                        console.log("++++"+score);
+
+                    },
+                    error: function () {
+                        alert("页面加载数据失败，请刷新页面");
+
+                    },
+                    complete:function () {
+                        return score;
+                    }
+                });
+            }
+
+            scoretest = [10,12,13,14,15,14,13,12,11,12,13,15];
+            //function
+            let mydate = new Date();
+            today  = mydate.toLocaleDateString();
+            dates = [];
+            //获得日期
+
+            for(let j = 0; j < 12; j++){
+                dates.push(addDate(today, -j));
+            }
+            var title = {
+                text: '历史得分'
+            };
+            var subtitle = {
+                text: '已统计十二天数据'
+            };
+            var xAxis = {
+                categories: dates
+            };
+            var yAxis = {
+                title: {
+                    text: '得分'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            };
+
+            var tooltip = {
+                valueSuffix: '\xB0C'
+            }
+
+            var legend = {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                borderWidth: 0
+            };
+
+            var series = [
+
+                {
+                    name: '近期得分',
+                    data: [9.2, 8.5,8.6, 8.4, 9.3, 5.4, 8.6,
+                        8.9, 9.3, 9.0, 7.9, 8.4]
+                }
+            ];
+
+
+            var json = {};
+
+            json.title = title;
+            json.subtitle = subtitle;
+            json.xAxis = xAxis;
+            json.yAxis = yAxis;
+            json.tooltip = tooltip;
+            json.legend = legend;
+            json.series = series;
+
+            //changed
+            let score1 = new Array();
+            score1 = initData();
+            console.log('-----------------------------');
+            console.log("1320"+score1);
+            console.log('-----------------------------');
+
+            $('#container').highcharts(json);
+
+        });
+
+    </script>
+    <script type="application/javascript">
+
+            //对比过程
+            let ImageScore = {
+
+                    url: "imagescore", //请求图片
+                    dataTpye: "json",
+                    data: {},
+                    type: "post",
+                    success: function (msg) {
+                        //根据后台返回前台的msg给提示信息加HTML
+                        //msg.replace('\\','/')
+                        console.log(msg);
+                        //$("#info").html(msg);
+                        var parsedJson = jQuery.parseJSON(msg);
+                        let score = parsedJson['score']
+                        console.log(parsedJson);
+                        //$("#image").attr("src","static/"+msg);
+                        $("#image1").attr("src", parsedJson['img']);
+                        $("#image2  ").attr("src", parsedJson['eimg']);
+                        $.cookie("image", parsedJson['img']);
+                        $.cookie("eimage", parsedJson['eimg']);
+                        alert('本次得分'+score);
+                        $("#showimage").dialog({
+                            "width":800,
+                            "height":600,
+                            "title":"动作对比图",
+                            "hide": "slide"
+                        });
+                    },
+                    error: function () {  //请求失败的回调方法
+                        alert("请求失败，请重试");
+                    }
+            };
+            //校正过程
+            let checkimage = {
+
+                    url: "askimage", //请求图片
+                    dataTpye: "json",
+                    data: {},
+                    type: "post",
+                    success: function (msg) {
+
+                        console.log(msg);
+
+                        var parsedJson = jQuery.parseJSON(msg);
+                        console.log(parsedJson);
+
+                        $("#image1").attr("src", parsedJson['img']);
+                        $("#image2  ").attr("src", parsedJson['eimg']);
+
+                    },
+                    error: function () {  //请求失败的回调方法
+                        alert("请求失败，请重试");
+                    },
+                    complete:function () {
+                        $.ajax(ImageScore);//保证checkimage执行完成之后再执行
+                    }
+            };
+
+            let stopac = {
+
+                    url: "stopaction", //请求图片
+                    dataTpye: "json",
+                    data: {},
+                    type: "post",
+                    success: function (msg) {
+                        //根据后台返回前台的msg给提示信息加HTML
+                        //msg.replace('\\','/')
+                        console.log(msg);
+                        //$("#info").html(msg);
+
+                    },
+                    error: function () {  //请求失败的回调方法
+                        alert("请求失败，请重试");
+                    }
+            };
+        function stopaction() {
+            $.ajax(stopac);
+        }
+          function checkaction(id){
+                $.cookie("actionid", id);
+                $.ajax(checkimage);
+            }
+        function setcookie(id) {
+            $.cookie("actionid", id);
+            $("#showimage").dialog({
+                            "width":800,
+                            "height":600,
+                            "title":"动作对比图",
+                            "hide": "slide"
+                        });
+        }
+        function closedialog() {
+            $("#showimage").dialog("close");
+            imagepath = $.cookie("image");
+            eimagepath = $.cookie("eimage");
+            //删除cookie所保存路径的图片
+        }
+
+    </script>
+    <style type="text/css">
+        .all{padding:0;margin:0; border:0; list-style:none;background:#000;
+            width:930px; border:1px solid #ccc; margin:100px auto; overflow:hidden; padding:10px 0 0 10px;}
+         .all ul,li,img{padding:0;margin:0; border:0; list-style:none;}
+        .all li{width:295px; height:286px; float:left; margin-right:10px; margin-bottom:10px; cursor:pointer;}
+
+    </style>
+</head>
+
+<body>
+
+<!-- Preloader -->
+<div class="loader-mask">
+    <div class="loader">
+        "Loading..."
+    </div>
+</div>
+
+<main class="main-wrapper">
+
+    <!-- Navigation -->
+    <header class="nav nav--transparent nav--always-fixed nav--sticky-on-mobile">
+        <div class="nav__holder nav__holder--no-line" id="sticky-nav">
+
+            <div class="container-fluid container-semi-fluid">
+                <div class="flex-parent">
+
+                    <div class="nav__header clearfix" >
+                        <!-- Logo -->
+                        <div class="logo-wrap">
+                            <a href="index" class="logo__link">
+                                <img class="logo logo--dark" src="{% static 'img/logo_dark.png' %}" alt="logo">
+                                <img class="logo logo--light" src="{% static 'img/logo_light.png' %}" alt="logo">
+                            </a>
+                            <div id="th" style="color: black;background-color: #2cb8a5"></div>
+                            <button id="stopaction" onclick="stopaction()">结束运动</button>
+                        </div>
+                    </div> <!-- end nav-header -->
+
+                    <!-- Nav Open Icon -->
+                    <div class="nav__icon-wrap">
+                        <div id="nav__icon" class="nav__icon">
+                            <div class="nav__icon__inner">
+                                <a href="#" id="nav__icon__trigger" class="nav__icon__trigger">
+
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- end flex-parent -->
+            </div> <!-- end container -->
+        </div>
+
+
+        <!-- Fullscreen Menu -->
+        <div class="nav__overlay" id="nav__overlay">
+            <div class="nav__overlay__menu">
+                <ul>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Works</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="index">Demos</a></li>
+                </ul>
+            </div>
+
+            <!-- Nav Close Icon -->
+            <div class="nav__icon-wrap">
+                <div class="nav__icon">
+                    <div class="nav__icon__inner">
+                        <a href="#" id="nav__icon__close" class="nav__icon__trigger">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </header> <!-- end navigation -->
+    <div class="tlinks">Collect from <a href="http://www.cssmoban.com/">网站建设</a></div>
+
+    <div class="content-wrapper oh">
+
+        <!-- Fullpage -->
+        <div id="fullpage" class="fullscreen-img">
+
+            <!-- 系统首页  导航以及系统简介-->
+            <div class="section hero bg-img" style="background-image: url({% static 'img/hero/hero_6_1.jpg' %});">
+                <div class="container">
+                    <div class="hero__outer">
+                        <div class="hero__inner">
+                            <h3 class="hero__subtitle--uppercase">HelloWorld团队</h3>
+                            <h1 class="hero__title hero--boxed--md hero--bold">基于OpenPose运动辅助系统</h1>
+                        </div>
+                    </div>
+
+                    <!-- Partners -->
+                    <div class="partners partners--overlay">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-xs-3 col-xxs-6">
+                                    <a href="#">
+                                        <img src="{% static 'img/partners/partner_logo_light_1.png' %}" alt="">
+                                    </a>
+                                </div>
+                                <div class="col-xs-3 col-xxs-6">
+                                    <a href="#">
+                                        <img src="{% static 'img/partners/partner_logo_light_2.png' %}" alt="">
+                                    </a>
+                                </div>
+                                <div class="col-xs-3 col-xxs-6">
+                                    <a href="#">
+                                        <img src="{% static 'img/partners/partner_logo_light_3.png' %}" alt="">
+                                    </a>
+                                </div>
+                                <div class="col-xs-3 col-xxs-6">
+                                    <a href="#">
+                                        <img src="{% static 'img/partners/partner_logo_light_4.png' %}" alt="">
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- end partners -->
+
+
+                </div>
+            </div> <!-- end hero -->
+
+
+            <!-- 校正  以及开始运动界面 -->
+            <div class="section hero bg-img" style="background-image: url({% static 'img/hero/hero_6_4.jpg' %})">
+
+                   <!-- <button id="getimage">校正</button>  -->
+                    <div id="showimage" style="display: none;background-color: skyblue;width: 75%;height: 55%;">
+
+                       <!--<img src="{% static 'img/team/1.jpg' %}" id="image1"> -->
+                        <img src="{% static 'img/team/1.jpg' %}" id="image1" style="width: 300px; height: 450px">
+                        <img src="{% static 'img/team/2.jpg' %}" id="image2" style="width: 300px; height: 450px;
+                        position: relative;left: 150px;">
+                        <br><br>
+                        <div style="width: 100%;height: 10%;text-align: center">
+                            <button onclick="savethisaction()">收藏本次运动</button>
+                            <button onclick="closedialog()">关闭窗口</button>
+                        </div>
+
+                    </div>
+                <br>
+                <!--
+                    <div style="width: 500px;height: 300px; display:inline-block; position: absolute; top:100px;">
+                        <img src="{% static 'img/team/1.jpg' %}" id="image1">
+                    </div> -->
+
+                    <div class="all" id="box" style="position: absolute;left: 200px; top:50px; margin: 0px">
+                        <ul>
+                            <li><img src="{% static 'img/blog/01.jpg' %}" width="260" height="286" onclick="checkaction(1)"/></li>
+                            <li><img src="{% static 'img/blog/02.jpg' %}" width="260" height="286" onclick="checkaction(2)"/></li>
+                            <li><img src="{% static 'img/blog/03.jpg' %}" width="260" height="286" onclick="checkaction(3)"/></li>
+                            <li><img src="{% static 'img/blog/04.jpg' %}" width="260" height="286" onclick="checkaction(4)"/></li>
+                            <li><img src="{% static 'img/blog/05.jpg' %}" width="260" height="286" onclick="checkaction(5)"/></li>
+                            <li><img src="{% static 'img/blog/06.jpg' %}" width="260" height="286" onclick="checkaction(6)"/></li>
+                        </ul>
+                    </div>
+                    <!--<div style="width: 500px;height: 300px;display:inline-block;position: absolute; top:100px;">
+                        <img src="{% static 'img/team/2.jpg' %}" id="image2">
+                    </div> -->
+
+
+            </div> <!-- end project 2 -->
+
+
+            <!-- 视频上传以及视频播放界面-->
+            <div class="section hero bg-img" style="background-image: url({% static 'img/hero/hero_6_2.jpg' %})">
+                <div class="container pt-sm-60">
+
+                    <div class="heading-row text-center">
+                        <h2 class="heading heading--lg">视频教程</h2>
+                        <p class="subheading white hidden-sm hidden-xs">在这里你可以选择你自己想要的视频并跟随他们学习</p>
+                    </div>
+
+                    <div class="row">
+                        <div id="owl-services-slider" class="owl-carousel owl-theme">
+
+                            <div class="feature feature--transparent text-center">
+                                <div class="feature__base feature--border">
+                                    <a href="#" class="feature__icon-holder">
+                                        <i class="pe-7s-cloud feature__icon"></i>
+                                    </a>
+                                    <div class="feature__text">
+                                        <video id="video" autoplay="autoplay" loop="loop" preload="auto"
+                                               controls="controls" src="{% static 'img/vedio1.mp4' %}" poster="pre.jpg"
+                                               width="640" height="1280">
+                                            浏览器不支持该视频格式
+                                        </video>
+                                        <h3 class="feature__title bottom-line">iOS Apps</h3>
+                                        <p class="feature__text__paragraph">Gaze is a simple and elegant template with
+                                            tons of features. Lorem ipsum dolor sit amet, consectetur.</p>
+                                    </div>
+                                </div>
+                            </div> <!-- end feature item -->
+
+                            <div class="feature feature--transparent text-center">
+                                <div class="feature__base feature--border">
+                                    <a href="#" class="feature__icon-holder">
+                                        <i class="pe-7s-diamond feature__icon"></i>
+                                    </a>
+                                    <div class="feature__text">
+                                        <video id="video" autoplay="autoplay" loop="loop" preload="auto"
+                                               controls="controls" src="{% static 'img/vedio1.mp4' %}" poster="pre.jpg"
+                                               width="640" height="1280">
+                                            浏览器不支持该视频格式
+                                        </video>
+                                        <h3 class="feature__title bottom-line">Web Design</h3>
+                                        <p class="feature__text__paragraph">Gaze is a simple and elegant template with
+                                            tons of features. Lorem ipsum dolor sit amet, consectetur.</p>
+                                    </div>
+                                </div>
+                            </div> <!-- end feature item -->
+
+                            <div class="feature feature--transparent text-center">
+                                <div class="feature__base feature--border">
+                                    <a href="#" class="feature__icon-holder">
+                                        <i class="pe-7s-shopbag feature__icon"></i>
+                                    </a>
+                                    <div class="feature__text">
+                                        <video id="video" autoplay="autoplay" loop="loop" preload="auto"
+                                               controls="controls" src="{% static 'img/vedio1.mp4' %}" poster="pre.jpg"
+                                               width="640" height="1280">
+                                            浏览器不支持该视频格式
+                                        </video>
+                                        <h3 class="feature__title bottom-line">eCommerce</h3>
+                                        <p class="feature__text__paragraph">Gaze is a simple and elegant template with
+                                            tons of features. Lorem ipsum dolor sit amet, consectetur.</p>
+                                    </div>
+                                </div>
+                            </div> <!-- end feature item -->
+
+                            <div class="feature feature--transparent text-center">
+                                <div class="feature__base feature--border">
+                                    <a href="#" class="feature__icon-holder">
+                                        <i class="pe-7s-graph2 feature__icon"></i>
+                                    </a>
+                                    <div class="feature__text">
+                                        <video id="video" autoplay="autoplay" loop="loop" preload="auto"
+                                               controls="controls" src="{% static 'img/vedio1.mp4' %}" poster="pre.jpg"
+                                               width="640" height="1280">
+                                            浏览器不支持该视频格式
+                                        </video>
+                                        <h3 class="feature__title bottom-line">Marketing</h3>
+                                        <p class="feature__text__paragraph">Gaze is a simple and elegant template with
+                                            tons of features. Lorem ipsum dolor sit amet, consectetur.</p>
+                                    </div>
+                                </div>
+                            </div> <!-- end feature item -->
+
+                        </div>
+                    </div>
+
+                </div>
+            </div> <!-- end services -->
+
+            <!-- 历史 数据显示界面 -->
+            <div class="section hero bg-img" style="background-image: url({% static 'img/hero/hero_6_3.jpg' %})">
+
+                <div id="container" style="width: 550px; height: 400px; margin: 0 auto"></div>
+
+
+            </div> <!-- end project 1 -->
+
+            <!-- Contact -->
+            <div class="section hero bg-img" style="background-image: url({% static 'img/hero/hero_6_5.jpg' %})">
+                <div class="container pt-sm-60">
+                    <div class="hero__outer">
+                        <div class="hero__inner text-center">
+
+                            <div class="heading-row text-center">
+                                <h2 class="heading heading--lg">Contact Us</h2>
+                                <p class="subheading white hidden-xs">Feel free to contact us or visit us at our office
+                                    anytime.
+                                </p>
+                            </div>
+
+                            <div class="contact-item">
+                                <address>California CA Clark Inc. 48793 Star Apple</address>
+                                <p>More Templates <a href="http://www.cssmoban.com/" target="_blank"
+                                                     title="模板之家">模板之家</a> - Collect from <a
+                                        href="http://www.cssmoban.com/" title="网页模板" target="_blank">网页模板</a></p>
+                            </div> <!-- end address -->
+
+                            <div class="contact-item">
+                                <span class="contact-item__title">Phone:</span>
+                                <a href="tel:+64-93-310-70-50" class="contact-item__phone">+64 93 310 70 50</a>
+                            </div> <!-- end phone -->
+
+                            <div class="contact-item">
+                                <span class="contact-item__title">Email:</span>
+                                <a href="mailto:hello@support.com" class="contact-item__email">hello@support.com</a>
+                            </div> <!-- end email -->
+
+                            <div class="social-icons social-icons--nobase social-icons--white mt-50">
+                                <a href="#"><i class="ui-twitter"></i></a>
+                                <a href="#"><i class="ui-facebook"></i></a>
+                                <a href="#"><i class="ui-linkedin"></i></a>
+                                <a href="#"><i class="ui-instagram"></i></a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- end contact -->
+        </div> <!-- end fullpage -->
+
+
+    </div> <!-- end content wrapper -->
+</main> <!-- end main wrapper -->
+
+
+<!-- jQuery Scripts -->
+
+<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/plugins.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
+
+</body>
+</html>

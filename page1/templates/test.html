@@ -1,0 +1,60 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+<head>
+    <meta charset="UTF-8">
+    <title>测试页面</title>
+    <script src="{% static 'js/jquery-3.3.1.js' %}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#getimage").click(function(){
+
+                $.ajax({
+                    url : "askimage", //请求图片
+                    dataTpye : "json",
+                    data : {
+
+                    },
+                    type : "post",
+                    success : function(msg) {
+                        //根据后台返回前台的msg给提示信息加HTML
+                        //msg.replace('\\','/')
+                        console.log(msg);
+                        $("#info").html(msg);
+                        var parsedJson = jQuery.parseJSON(msg);
+                        console.log(parsedJson);
+                        //$("#image").attr("src","static/"+msg);
+                        $("#image").attr("src",parsedJson['img']);
+                        $("#image2  ").attr("src",parsedJson['eimg']);
+                    },
+                    error:function(){  //请求失败的回调方法
+                        alert("请求失败，请重试");
+                    }
+                });
+                });
+            });
+        //window.setInterval(function(){$.ajax(getting)},3000);   //每三秒调用一次ajax
+    </script>
+</head>
+<body>
+    <p>hello world Django</p>
+    <form action="addth">
+        <input type="text" name="temp">
+        <input type="text" name="hmui">
+        <input type="submit" value="提交">
+    </form>
+    <a href="getfirst">获取一个数据</a>
+    <button id = "getimage">校正</button>
+         <div id="info">
+	</div>
+    <img id="image" ><br><br><br><br>
+    <img id="image2" >
+
+    <form method="post" action="/upload/" enctype="multipart/form-data">
+
+        <input id='img' type="file" name="img" />
+        <input type="submit" />
+    </form>
+</body>
+</html>

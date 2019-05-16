@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "standardAngles": {
+      "rshoulder": 180,
+      "lshoulder": 180,
+      "relbow": 175,
+      "lelbow": 175,
+      "rhip": 170,
+      "lhip": 170,
+      "rknee": 175,
+      "lknee": 175
+    }
+  },
+  {
+    "id": 2,
+    "standardAngles": {
+      "rshoulder": 103,
+      "lshoulder": 165,
+      "relbow": 172,
+      "lelbow": 180,
+      "rhip": 173,
+      "lhip": 168,
+      "rknee": 175,
+      "lknee": 170
+    }
+  },
+  {
+    "id": 3,
+    "standardAngles": {
+      "rshoulder": 156.0,
+      "lshoulder": 155,
+      "relbow": 173,
+      "lelbow": 177,
+      "rhip": 113,
+      "lhip": 167,
+      "rknee": 120,
+      "lknee": 168
+    }
+  },
+  {
+    "id": 4,
+    "standardAngles": {
+      "rshoulder": 141,
+      "lshoulder": 175,
+      "relbow": 176,
+      "lelbow": 172,
+      "rhip": 178,
+      "lhip": 160,
+      "rknee": 180,
+      "lknee": 180
+    }
+  },
+  {
+    "id": 5,
+    "standardAngles": {
+      "rshoulder": 153.0,
+      "lshoulder": 146,
+      "relbow": 168,
+      "lelbow": 174,
+      "rhip": 168,
+      "lhip": 177,
+      "rknee": 174,
+      "lknee": 179
+    }
+  },
+  {
+    "id": 6,
+    "standardAngles": {
+      "rshoulder": 127,
+      "lshoulder": 121,
+      "relbow": 109,
+      "lelbow": 113,
+      "rhip": 168,
+      "lhip": 170,
+      "rknee": 175,
+      "lknee": 177
+    }
+  }
+]

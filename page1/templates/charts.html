@@ -1,0 +1,92 @@
+{% load staticfiles %}
+
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="http://www.jq22.com/jquery/bootstrap-3.3.4.css">
+<script type="text/javascript" src="{% static 'js/jquery-3.3.1.js' %}"></script>
+    <script>
+
+        score = [];
+        $(function(){
+            initData();
+            changedata(1000, 5);
+        });
+
+        //加载初始化数据
+        function initData(){
+            $.ajax({
+                type:'GET',
+                dataType: "json",
+                url:"getall",
+                /*data:{
+                 email:$("#email").val(),
+                 password:$("#password").val()
+                 },*/
+
+                success:function(res){
+                    //alert("加载数据");
+                    console.log(res.length);
+
+                    for(let i = 0; i < res.length; i++){
+                        score.push(res[i].fields.temp);
+                    }
+
+                    console.log(score);
+                },
+                error:function(){
+                    alert("页面加载数据失败，请刷新页面");
+                }
+            });
+        }
+
+    </script>
+
+
+<body>
+
+    <div class="contain">
+        <div class="sel">
+            <div class="sel1">
+                <div class="top">
+                    <span>选择时间间隔</span>
+                    <div class="show">
+                        <span>one second</span>
+                        <i class="glyphicon glyphicon-chevron-right"></i>
+                    </div>
+                </div>
+                <div class="block">
+                    <div leap="second">one second</div>
+                    <div leap="minute">one minute</div>
+                    <div leap="hour">one hour</div>
+                    <div leap="day">one day</div>
+                    <div leap="week">one week</div>
+                    <div leap="month">one month</div>
+                    <div class="active" leap="year">one year</div>
+                </div>
+            </div>
+            <div class="sel2" style="text-align: center">
+                <div class="top">
+                    <span>选择数据个数</span>
+                    <div class="show">
+                        <span>5</span>
+                        <i class="glyphicon glyphicon-chevron-right"></i>
+                    </div>
+                </div>
+                <div class="block">
+                    <div leap="5">5</div>
+                    <div leap="10">10</div>
+                    <div leap="15">15</div>
+                    <div leap="20">20</div>
+                    <div leap="25">25</div>
+                    <div leap="30">30</div>
+                    <div leap="35">35</div>
+                </div>
+            </div>
+            <div class="zybtn">确定</div>
+        </div>
+        <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+        <div id="main" style="width: 1000px;height:400px;margin-top:45px;"></div>
+        <div id="main2" style="width: 1000px;height:400px;"></div>
+    </div>
+
+ <script src="https://cdn.bootcss.com/echarts/4.2.0-rc.2/echarts.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
